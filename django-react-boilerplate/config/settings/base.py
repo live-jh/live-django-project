@@ -9,29 +9,31 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settingss and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-from os.path import dirname, abspath, join
+import json
+import os
+from os.path import join
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # BASE_DIR = Path(__file__).resolve().parent.parent
-# django-react-boilerplate
 # BASE_DIR = dirname(dirname(dirname(abspath(__file__))))
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-
 # Quick-start development settingss - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-^@9fs61d%0t58qdiu1+94xae=unp(zg)mo2$(@77668io+q!7+'
+SERVER_ENV = os.environ.get('SERVER_ENV', 'Local')
+if SERVER_ENV == 'Local':
+    DEBUG = True
+else:
+    DEBUG = False
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = []
-
-
 
 # Application definition
 
@@ -46,7 +48,6 @@ INSTALLED_APPS = [
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -77,18 +78,6 @@ TEMPLATES = [
     },
 ]
 
-
-# Database
-# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
@@ -106,7 +95,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
@@ -127,6 +115,22 @@ STATIC_ROOT = join(BASE_DIR, 'frontend/static')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = join(BASE_DIR, 'media')
 
+env_json = join(BASE_DIR, 'config/common/env.json')
+
+with open(env_json) as f:
+    secrets = json.loads(f.read())['development']
+
+
+def get_secret(setting, secrets=secrets):
+    """비밀 변수를 가져오거나 명시적 예외를 반환한다."""
+    try:
+        return secrets[setting]
+    except KeyError:
+        error_msg = "Set the {} environment variable".format(setting)
+        raise ImproperlyConfigured(error_msg)
+
+
+SECRET_KEY = get_secret("SECRET_KEY")
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
