@@ -1,2 +1,15 @@
 # live-django-project
-default django projects (drf, full-framework)
+
+
+### django-react-boilerplate
+
+- Backend - Python&Django
+- Frontend - TypeScript&React
+
+
+
+### django-full-framework
+
+- Python&Django
+- HTML&CSS&JavaScript
+
